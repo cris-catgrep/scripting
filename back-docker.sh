@@ -9,7 +9,6 @@ for dir in $(sudo docker compose ls | awk 'NR>1 { print $3 }'); do
     
     for cont in $(sudo docker compose ps -a | awk 'NR>1 { print $1 }'); do
         echo $cont 
-        sudo docker inspect --format='{{range .Mounts}}{{println .Source .Destination}}{{end}}' "$cont"
-
+        sudo docker inspect --format '{{range .Mounts}} {{.Source}} {{.Destination}} {{println}}{{end}}'
     done
 done
