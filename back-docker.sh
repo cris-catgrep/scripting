@@ -12,16 +12,18 @@ for dir in $(sudo docker compose ls | awk 'NR>1 { print $3 }'); do
     
     # Ciclo en el que ira por cada compose activo o detenido
     for cont in $(sudo docker compose ps -a | awk 'NR>1 { print $1 }'); do
-        if [[ -z "$vol" ]]; then
-            echo "$cont"
-        elif [[ -d "$vol" ]]; then
-            sudo docker compose stop
-            if [[ "$vol" == "$directory"* ]]; then
-                sudo docker run --rm -v "$vol":/volume -v "$backup_dir":/backup alpine tar -czf /backup/$cont.tar.gz -C /volume ./
-            else
-                echo "nada"
+        for vol in $(sudo docker inspect --format='{{range .Mounts}}{{println .Source}}{{end}}' "$cont"); do
+            if [[ -z "$vol" ]]; then
+                echo "$cont"
+            elif [[ -d "$vol" ]]; then
+                sudo docker compose stop
+                if [[ "$vol" == "$directory"* ]]; then
+                    dir=$(basename "$vol")
+                    sudo docker run --rm -v "$vol":/volume -v "$backup_dir":/backup alpine tar -czf /backup/$cont-$dir.tar.gz -C /volume ./
+                else
+                    echo "nada"
+                fi
             fi
-        fi
 
         done
     done
