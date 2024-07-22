@@ -1,7 +1,24 @@
 #!/bin/bash
+
+####################################################
+# SOLO FUNCIONA CON MOUNT POINTS, NO CON VOLUMENES #
+####################################################
+
 backup_dir=/home/$USER/backup
+fecha=$(date '+%Y-%m-%d')
 
 mkdir -p $backup_dir
+mkdir -p $backup_dir/$fecha
+
+# Funcion que revisa la última fecha de modificación de los directorios de respaldos y elimina aquellos mayores a 7 dias
+function dir_clean() {
+    cd $backup_dir
+    for dir1 in $backup_dir* ; do
+        if [[ $(find $dir1 -mtime +7) ]]; then
+            rm -rf $dir1
+        fi
+    done
+}
 
 # Ciclo for que imprime el directorio donde se encuentran los archivos docker-compose de contenedor ejecutandose
 for dir in $(sudo docker compose ls | awk 'NR>1 { print $3 }'); do
@@ -19,12 +36,14 @@ for dir in $(sudo docker compose ls | awk 'NR>1 { print $3 }'); do
                 sudo docker compose stop
                 if [[ "$vol" == "$directory"* ]]; then
                     dir=$(basename "$vol")
-                    sudo docker run --rm -v "$vol":/volume -v "$backup_dir":/backup alpine tar -czf /backup/$cont-$dir.tar.gz -C /volume ./
+                    sudo docker run --rm -v "$vol":/volume -v "$backup_dir/$fecha":/backup alpine tar -czf /backup/$cont-$dir-$fecha.tar.gz -C /volume ./
                 else
                     echo "nada"
                 fi
             fi
-
+            sudo docker compose up -d
         done
     done
 done
+
+dir_clean
