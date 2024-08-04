@@ -13,7 +13,7 @@ mkdir -p $backup_dir/$fecha
 # Funcion que revisa la última fecha de modificación de los directorios de respaldos y elimina aquellos mayores a 7 dias
 function dir_clean() {
     cd $backup_dir
-    for dir1 in $backup_dir* ; do
+    for dir1 in * ; do
         if [[ $(find $dir1 -mtime +7) ]]; then
             rm -rf $dir1
         fi
