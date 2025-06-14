@@ -2,6 +2,11 @@
 
 #Script que lanza una notificación de Dunst al moverse de escritorio
 
-hyprctl dispatch workspace 2
-#workspace-notify () {
-#    dunsti
+workspace-notify () {
+
+    hyprctl dispatch workspace $1 && dunstify --urgency=critical "Workspace $1"
+
+}
+
+workspace-notify $1
+
